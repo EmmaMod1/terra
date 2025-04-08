@@ -33,7 +33,8 @@ resource "aws_launch_configuration" "example" {
 data "aws_subnets" "default" {
   filter {
     name   = "subnetlabel"
-    values = "terraform-asg-sub-example"  # Remplace par tes tags ou critères spécifiques
+    values =  = ["terraform-asg-sub-example"]
+ # Remplace par tes tags ou critères spécifiques
   }
 }
 
