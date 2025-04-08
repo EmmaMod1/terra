@@ -1,3 +1,6 @@
+provider "aws" {
+  region = "us-east-2"
+}
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
 
