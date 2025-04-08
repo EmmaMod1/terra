@@ -32,7 +32,7 @@ resource "aws_launch_configuration" "example" {
 # Déclaration de la source de données des subnets
 data "aws_subnets" "default" {
   filter {
-    name   = "tag:Name"
+    name   = "subnetlabel"
     values = "terraform-asg-sub-example"  # Remplace par tes tags ou critères spécifiques
   }
 }
