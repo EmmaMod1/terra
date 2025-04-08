@@ -21,7 +21,7 @@ provider "aws" {
 # Déclaration de la ressource Launch Configuration
 resource "aws_launch_configuration" "example" {
   name          = "example-launch-config"
-  image_id      = "ami-0fb653ca2d3203ac1"  # Remplace par une AMI valide
+  image_id      = "ami-0c02fb55956c7d316"  # Remplace par une AMI valide
   instance_type = "t2.micro"
 
   lifecycle {
