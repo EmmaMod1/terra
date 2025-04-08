@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "example" {
-  aws_launch_template = aws_launch_template.example.name
+  aws_launch_template = aws_launch_configuration.example.name
   vpc_zone_identifier  = data.aws_subnets.default.ids
 
   min_size = 2
