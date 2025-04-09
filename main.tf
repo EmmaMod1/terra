@@ -1,23 +1,26 @@
 provider "aws" {
   region = "us-east-2"
 }
-resource "aws_s3dom_bucket" "terraform_state" {
-  bucket = "terraform-up-and-running-state"
 
-  # Prevent accidental deletion of this S3 bucket
+# S3 Bucket pour stocker le state Terraform
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "terraform-up-and-running-state-dom2791" # Change ce nom pour qu'il soit unique globalement
+
   lifecycle {
     prevent_destroy = true
   }
 }
-# Enable versioning so you can see the full revision history of your
-# state files
+
+# Activer le versioning du bucket
 resource "aws_s3_bucket_versioning" "enabled" {
   bucket = aws_s3_bucket.terraform_state.id
+
   versioning_configuration {
     status = "Enabled"
   }
 }
-# Enable server-side encryption by default
+
+# Activer le chiffrement côté serveur
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -27,7 +30,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
     }
   }
 }
-# Explicitly block all public access to the S3 bucket
+
+# Bloquer tout accès public au bucket
 resource "aws_s3_bucket_public_access_block" "public_access" {
   bucket                  = aws_s3_bucket.terraform_state.id
   block_public_acls       = true
@@ -35,6 +39,8 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# DynamoDB pour les verrous d'état
 resource "aws_dynamodb_table" "terraform_locks" {
   name         = "terraform-up-and-running-locks"
   billing_mode = "PAY_PER_REQUEST"
