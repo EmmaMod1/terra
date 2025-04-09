@@ -1,43 +1,47 @@
-# Fournisseur AWS
 provider "aws" {
-  region = "us-east-1"  # Change la région si besoin
+  region = "us-east-2"
 }
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "terraform-up-and-running-state"
 
-# VPC/Subnets (assure-toi que tu as bien des subnets taggés)
-data "aws_subnets" "default" {
-  filter {
-    name   = "tag:Name"
-    values = ["terraform-asg-sub-example"]  # Remplace par tes vrais tags de subnet
+  # Prevent accidental deletion of this S3 bucket
+  lifecycle {
+    prevent_destroy = true
   }
 }
-
-# Launch Template
-resource "aws_launch_template" "example" {
-  name_prefix   = "example-launch-template-"
-  image_id      = "ami-0c02fb55956c7d316"  # Amazon Linux 2 (valide en us-east-1)
-  instance_type = "t2.micro"
+# Enable versioning so you can see the full revision history of your
+# state files
+resource "aws_s3_bucket_versioning" "enabled" {
+  bucket = aws_s3_bucket.terraform_state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
+# Enable server-side encryption by default
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  bucket = aws_s3_bucket.terraform_state.id
 
-# Auto Scaling Group
-resource "aws_autoscaling_group" "example" {
-  desired_capacity     = 1
-  max_size             = 2
-  min_size             = 1
-  vpc_zone_identifier  = data.aws_subnets.default.ids
-
-  launch_template {
-    id      = aws_launch_template.example.id
-    version = "$Latest"
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
+}
+# Explicitly block all public access to the S3 bucket
+resource "aws_s3_bucket_public_access_block" "public_access" {
+  bucket                  = aws_s3_bucket.terraform_state.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = "terraform-up-and-running-locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
 
-  tag {
-    key                 = "Name"
-    value               = "terraform-asg-instance"
-    propagate_at_launch = true
+  attribute {
+    name = "LockID"
+    type = "S"
   }
-
-  health_check_type         = "EC2"
-  health_check_grace_period = 300
-  force_delete              = true
-  wait_for_capacity_timeout = "0"
 }
