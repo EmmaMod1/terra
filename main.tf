@@ -7,7 +7,7 @@ resource "aws_s3_bucket" "terraform_state" {
   bucket = "terraform-up-and-running-state-dom2791" # Change ce nom pour qu'il soit unique globalement
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
