@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-2"
+  region = "us-east-1"
 }
 
 # S3 Bucket pour stocker le state Terraform
@@ -8,7 +8,6 @@ resource "aws_s3_bucket" "terraform_state" {
 
   lifecycle {
     prevent_destroy = true
-    region = "us-east-1" # ou la région où se trouve ton bucket
   }
 }
 
